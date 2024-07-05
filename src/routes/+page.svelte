@@ -6,21 +6,27 @@
 
 	const heroes = [
 		{
-			color: 'cyan'
+			color: 'cyan',
+			name: '汉字Alphabet'
 		},
 		{
-			color: 'pink'
+			color: 'pink',
+			name: '汉字Alphabet',
+
 		},
 		{
-			color: 'violet'
+			color: 'violet',
+			name: '汉字Alphabet',
+
 		},
 		{
-			color: 'yellow'
+			color: 'yellow',
+			name: '汉字Alphabet'
+
 		}
 	];
 	$: pick = 0;
 	function handleWheel(event: WheelEvent) {
-		console.log(event);
 		if (event.deltaY < 0) {
 			if (pick > 0) {
 				pick -= 1;
@@ -72,32 +78,30 @@
 		}
 	});
 </script>
-
-<div class="hero-picker-container" bind:this={container} on:wheel={handleWheel}>
-	{#each heroes as hero, index}
-		<div
-			class="hero-picker-card"
-			style="transform: rotateZ({calculateRotation(index)}) rotateY({calculateRotation(
-				index
-			)}) scale({calculateScale(index)}); 
-filter: brightness({calculateBrightness(index)});
-z-index: {heroes.length - getDisplayIndex(index)};"
-		>
-			<HeroPickerCard {...hero} />
-		</div>
-	{/each}
+<div class="flex flex-row content-center align-middle justify-between">
+	<div class="hero-picker-container content-center" bind:this={container} on:wheel={handleWheel}>
+		{#each heroes as hero, index}
+			<div
+				class="hero-picker-card"
+				style="transform: rotateZ({calculateRotation(index)}) rotateY({calculateRotation(
+					index
+				)}) scale({calculateScale(index)}); 
+	filter: brightness({calculateBrightness(index)});
+	z-index: {heroes.length - getDisplayIndex(index)};"
+			>
+				<HeroPickerCard {...hero} />
+			</div>
+		{/each}
+	</div>
+	<div class="flex-grow py-12">
+		<HeroIntro {...heroes[pick]} />
+	</div>
 </div>
-<div class="fixed right-0">
 
-	<HeroIntro  {...heroes[pick]}/>
-</div>
 <style>
 	.hero-picker-container {
 		perspective: 1000px;
-		position: relative;
-		justify-content: center;
-		align-items: center;
-		height: 300px;
+		min-width: 35vw;
 	}
 
 	.hero-picker-card {

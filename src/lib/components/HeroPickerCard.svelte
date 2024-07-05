@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { ButtonGroup, Button } from 'flowbite-svelte';
+
 	export let color: string;
-	$: className = `bg-${color}-200 card-shape`;
 </script>
 
-<div class={className}>card</div>
+<div class="card-shape border-black-200 border border-solid" style={`background: ${color};`}>
+
+</div>
 
 <style scoped>
 	.card-shape {

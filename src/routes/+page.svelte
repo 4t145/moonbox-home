@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { Listgroup, ListgroupItem, Avatar } from 'flowbite-svelte';
 	import HeroPickerCard from '$lib/components/HeroPickerCard.svelte';
+	import HeroIntro from '$lib/components/HeroIntro.svelte';
+	import { onMount, onDestroy } from 'svelte';
+
 	const heroes = [
 		{
 			color: 'cyan'
@@ -12,12 +15,12 @@
 			color: 'violet'
 		},
 		{
-			color: 'cyan'
+			color: 'yellow'
 		}
-		/* 英雄数据 */
 	];
 	$: pick = 0;
 	function handleWheel(event: WheelEvent) {
+		console.log(event);
 		if (event.deltaY < 0) {
 			if (pick > 0) {
 				pick -= 1;
@@ -33,60 +36,77 @@
 		}
 	}
 
+	$: getDisplayIndex = (index: number): number => {
+		if (index < pick) {
+			return heroes.length - pick + index;
+		} else {
+			return index - pick;
+		}
+	};
 	$: calculateRotation = (index: number): string => {
-		return `${(index - pick) * 10}deg`; 
+		const display_index = getDisplayIndex(index);
+		const deg_increment = 60 / heroes.length;
+		return `${display_index * deg_increment}deg`;
 	};
 
 	$: calculateScale = (index: number): number => {
-		return 1 - Math.abs(index - pick) * 0.05; 
+		const display_index = getDisplayIndex(index);
+		const scale_decrement = 0.3 / heroes.length;
+		return 1 - display_index * scale_decrement;
 	};
 
 	$: calculateBrightness = (index: number): number => {
-		return 1 - Math.abs(index - pick) * 0.1; 
+		const display_index = getDisplayIndex(index);
+		const brightness_decrement = 0.3 / heroes.length;
+		return 1 - display_index * brightness_decrement;
 	};
+	let container: HTMLDivElement;
+
+	onMount(() => {
+		container.addEventListener('wheel', handleWheel, { passive: true });
+	});
+
+	onDestroy(() => {
+		if (container) {
+			container.removeEventListener('wheel', handleWheel);
+		}
+	});
 </script>
 
-<div class="fixed left-0 m-5 w-36">
-	<Listgroup>
-		<ListgroupItem class="gap-2 text-base font-semibold">Section 1</ListgroupItem>
-		<ListgroupItem class="gap-2 text-base font-semibold">Section 2</ListgroupItem>
-		<ListgroupItem class="gap-2 text-base font-semibold">Section 3</ListgroupItem>
-	</Listgroup>
-</div>
-<div class="hero-picker-container" on:wheel={handleWheel}>
+<div class="hero-picker-container" bind:this={container} on:wheel={handleWheel}>
 	{#each heroes as hero, index}
 		<div
 			class="hero-picker-card"
 			style="transform: rotateZ({calculateRotation(index)}) rotateY({calculateRotation(
 				index
-			)}) scale({calculateScale(index)}); filter: brightness({calculateBrightness(index)});
-            z-index: {heroes.length - Math.abs(index - pick)}; /* 根据位置调整层级 */
-            "
+			)}) scale({calculateScale(index)}); 
+filter: brightness({calculateBrightness(index)});
+z-index: {heroes.length - getDisplayIndex(index)};"
 		>
 			<HeroPickerCard {...hero} />
 		</div>
 	{/each}
 </div>
+<div class="fixed right-0">
 
+	<HeroIntro  {...heroes[pick]}/>
+</div>
 <style>
 	.hero-picker-container {
-		perspective: 1000px; /* 提供足够的透视深度 */
+		perspective: 1000px;
 		position: relative;
-		justify-content: center; /* 居中显示 */
-		align-items: center; /* 居中显示 */
-		height: 300px; /* 根据需要调整 */
+		justify-content: center;
+		align-items: center;
+		height: 300px;
 	}
 
 	.hero-picker-card {
 		position: absolute;
-		transform-style: preserve-3d; /* 保持3D效果 */
+		transform-style: preserve-3d;
 		transform-origin: -30% 0%;
 		transition:
 			transform 0.5s ease,
 			filter 0.5s ease,
 			z-index 0s;
-		/* 根据卡片位置调整以下属性 */
-		transform: rotateY(20deg) scale(0.9); /* 示例：向右旋转并稍微缩小 */
-		filter: brightness(0.8); /* 颜色变暗 */
 	}
 </style>
